@@ -28,14 +28,14 @@ const getInitialPlayerState = (username = 'Player') => [
 ];
 
 export default function BattleGame({ telegramUsername }) {
-  const [gameState, setGameState] = useState('worldSelection');
-  const [selectedWorld, setSelectedWorld] = useState(null);
-  const [players, setPlayers] = useState(() => getInitialPlayerState(telegramUsername));
-  const [currentTurn, setCurrentTurn] = useState(0);
-  const [combatLog, setCombatLog] = useState([]);
-  const [winner, setWinner] = useState(null);
-  const [battleRound, setBattleRound] = useState(1);
-  const [powerActivations, setPowerActivations] = useState({ player1: 0, player2: 0 });
+    const [gameState, setGameState] = useState('worldSelection');
+    const [selectedWorld, setSelectedWorld] = useState(null);
+    const [players, setPlayers] = useState(() => getInitialPlayerState(telegramUsername));
+    const [currentTurn, setCurrentTurn] = useState(0);
+    const [combatLog, setCombatLog] = useState([]);
+    const [winner, setWinner] = useState(null);
+    const [battleRound, setBattleRound] = useState(1);
+    const [powerActivations, setPowerActivations] = useState({ player1: 0, player2: 0 });
 
   const resetGame = () => {
     setPlayers(getInitialPlayerState(telegramUsername));
@@ -113,17 +113,17 @@ export default function BattleGame({ telegramUsername }) {
 
   if (gameState === 'worldSelection') {
     return (
-      <div className="min-h-[100dvh] bg-gray-900 text-white p-4 overflow-hidden">
-        <h1 className="text-3xl font-bold text-center text-yellow-400 mb-6">Kingdom in Dispute</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+      <div className="fixed inset-0 bg-gray-900 text-white p-4">
+        <h1 className="text-4xl font-bold text-center text-yellow-400 mb-8">Kingdom in Dispute</h1>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {WORLDS.map(world => (
             <button 
               key={world.id} 
               onClick={() => startNewGame(world)} 
-              className={`${world.color} p-4 rounded-lg hover:opacity-90 transition-all`}
+              className={`${world.color} p-6 rounded-lg hover:opacity-90 transition-all`}
             >
-              <div className="text-3xl mb-2">{world.icon}</div>
-              <div className="text-lg font-bold mb-2">{world.name}</div>
+              <div className="text-4xl mb-2">{world.icon}</div>
+              <div className="text-xl font-bold mb-2">{world.name}</div>
               <div className="text-sm bg-black/20 rounded p-2">
                 <div className="flex items-center gap-2 justify-center mb-1">
                   <span>{world.power.icon}</span>
@@ -140,8 +140,8 @@ export default function BattleGame({ telegramUsername }) {
 
   if (gameState === 'victory') {
     return (
-        <div className="fixed inset-0 bg-gray-900 flex items-center justify-center text-white">
-        <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 text-center">
+      <div className="fixed inset-0 bg-black/90 flex items-center justify-center text-white">
+        <div className="bg-gray-800 rounded-xl p-8 max-w-md w-full text-center">
           <div className="text-6xl mb-4">🏆</div>
           <h2 className="text-4xl font-bold text-yellow-400 mb-4">{winner.name} Wins!</h2>
           <div className="bg-gray-700 rounded-lg p-4 mb-6">
@@ -172,87 +172,130 @@ export default function BattleGame({ telegramUsername }) {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-gray-900 text-white p-4 overflow-hidden">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-4">
-          <button
-            onClick={returnToWorldSelection}
-            className="bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-600 text-sm"
-          >
-            🏠 Home
-          </button>
-          <div className="flex items-center gap-2">
-            <span className="text-lg">Round {battleRound}</span>
-            <div className="flex items-center gap-1 bg-gray-700 px-2 py-1 rounded-lg text-sm">
-              <span>{selectedWorld.power.icon}</span>
-              <span className="font-bold">{selectedWorld.power.name}</span>
-            </div>
+    <div className="fixed inset-0 bg-gray-900 text-white flex flex-col">
+      {/* Header */}
+      <div className="flex justify-between items-center p-3 bg-gray-800/50">
+        <button
+          onClick={returnToWorldSelection}
+          className="bg-gray-700/50 px-3 py-1.5 rounded-lg hover:bg-gray-600 text-sm"
+        >
+          🏠 Home
+        </button>
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Round {battleRound}</span>
+          <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded-lg text-sm">
+            <span>{selectedWorld.power.icon}</span>
+            <span className="font-bold">{selectedWorld.power.name}</span>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 gap-4 relative mb-4">
-          {players.map((player, index) => (
-            <div 
-              key={index}
-              className={`p-3 rounded-lg ${currentTurn === index ? 'ring-2 ring-yellow-400 bg-gray-800' : 'bg-gray-800'}`}
-            >
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="font-bold text-base flex items-center gap-1">
-                  {player.name}
-                  {index === 0 && <span className="text-xs text-gray-400">(@{telegramUsername})</span>}
-                  {index === currentTurn && <span className="text-yellow-400">●</span>}
-                </h2>
-              </div>
-
-              <div className="space-y-2">
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span>Health</span>
-                    <span>{player.health}/100</span>
-                  </div>
-                  <div className="h-2 bg-gray-700 rounded-full">
-                    <div 
-                      className={`h-full rounded-full transition-all ${
-                        player.health > 60 ? 'bg-green-500' :
-                        player.health > 30 ? 'bg-yellow-500' :
-                        'bg-red-500'
-                      }`}
-                      style={{ width: `${player.health}%` }}
-                    />
-                  </div>
+      </div>
+  
+      {/* Game Content */}
+      <div className="flex-1 flex flex-col px-3">
+        {/* Players Container */}
+        <div className="relative flex-1 flex flex-col justify-between py-3">
+          {/* First Player */}
+          <div className={`bg-gray-800/50 rounded-lg p-4 border border-yellow-500/30`}>
+            <div className="flex items-center gap-2 mb-3">
+              <h2 className="font-bold text-base">
+                {players[0].name}
+              </h2>
+              <span className="text-xs text-gray-400">(@{telegramUsername})</span>
+              {currentTurn === 0 && <span className="text-yellow-400">●</span>}
+            </div>
+  
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span>Health</span>
+                  <span>{players[0].health}/100</span>
                 </div>
-
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span>Energy</span>
-                    <span>{player.energy}/50</span>
-                  </div>
-                  <div className="h-2 bg-gray-700 rounded-full">
-                    <div 
-                      className="h-full bg-blue-500 rounded-full transition-all"
-                      style={{ width: `${(player.energy / 50) * 100}%` }}
-                    />
-                  </div>
+                <div className="h-2 bg-gray-900/50 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all ${
+                      players[0].health > 60 ? 'bg-green-500' :
+                      players[0].health > 30 ? 'bg-yellow-500' :
+                      'bg-red-500'
+                    }`}
+                    style={{ width: `${players[0].health}%` }}
+                  />
+                </div>
+              </div>
+  
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span>Energy</span>
+                  <span>{players[0].energy}/50</span>
+                </div>
+                <div className="h-2 bg-gray-900/50 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-blue-500 rounded-full transition-all"
+                    style={{ width: `${(players[0].energy / 50) * 100}%` }}
+                  />
                 </div>
               </div>
             </div>
-          ))}
-          
+          </div>
+  
+          {/* VS Button */}
           <button
             onClick={attack}
             disabled={currentTurn === 1}
-            className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10
-              w-12 h-12 rounded-full flex items-center justify-center
+            className={`absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2
+              w-14 h-14 rounded-full flex items-center justify-center z-20
               ${currentTurn === 0 
                 ? 'bg-yellow-500 hover:bg-yellow-400 hover:scale-110' 
                 : 'bg-gray-600 opacity-50 cursor-not-allowed'
-              } transition-all duration-200`}
+              } transition-all duration-200 shadow-lg`}
           >
-            <span className="text-xl">⚔️</span>
+            <span className="text-2xl">⚔️</span>
           </button>
+  
+          {/* Second Player */}
+          <div className={`bg-gray-800/50 rounded-lg p-4`}>
+            <div className="flex items-center gap-2 mb-3">
+              <h2 className="font-bold text-base">
+                {players[1].name}
+              </h2>
+              {currentTurn === 1 && <span className="text-yellow-400">●</span>}
+            </div>
+  
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span>Health</span>
+                  <span>{players[1].health}/100</span>
+                </div>
+                <div className="h-2 bg-gray-900/50 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all ${
+                      players[1].health > 60 ? 'bg-green-500' :
+                      players[1].health > 30 ? 'bg-yellow-500' :
+                      'bg-red-500'
+                    }`}
+                    style={{ width: `${players[1].health}%` }}
+                  />
+                </div>
+              </div>
+  
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span>Energy</span>
+                  <span>{players[1].energy}/50</span>
+                </div>
+                <div className="h-2 bg-gray-900/50 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-blue-500 rounded-full transition-all"
+                    style={{ width: `${(players[1].energy / 50) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <div className="bg-gray-800 rounded-lg p-3 h-24 overflow-y-auto">
+  
+        {/* Combat Log */}
+        <div className="bg-gray-800/50 rounded-lg p-3 h-24 overflow-y-auto mt-3 mb-3">
           {combatLog.map((log, index) => (
             <div key={index} className="text-xs text-gray-300 mb-1">
               {log}

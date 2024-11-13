@@ -45,7 +45,11 @@ function App() {
     );
   }
 
-  return <BattleGame telegramUsername={username} />;
+  return (
+    <div className="fixed inset-0 bg-gray-900">
+      <BattleGame telegramUsername={username} />
+    </div>
+  );
 }
 
 export default App;
