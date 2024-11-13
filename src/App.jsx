@@ -1,22 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const WORLDS = [
   { id: 'amazon', name: 'Amazon', color: 'bg-green-700', icon: '🌳', power: { name: "Nature's Blessing", description: 'Heal 10 HP when below 30% health', icon: '💚' }},
   { id: 'darkland', name: 'Dark Lands', color: 'bg-stone-800', icon: '🌑', power: { name: 'Shadow Strike', description: '20% chance to deal double damage', icon: '🌒' }},
   { id: 'alaska', name: 'Alaska', color: 'bg-slate-100', icon: '❄️', power: { name: 'Frost Shield', description: '25% chance to reduce incoming damage by half', icon: '🛡️' }},
   { id: 'europe', name: 'Europe', color: 'bg-blue-600', icon: '🏰', power: { name: 'Royal Might', description: 'Gain 5 extra energy each turn', icon: '👑' }},
-  { id: 'africa', name: 'Africa', color: 'bg-yellow-500', icon: '🦁', power: { name: 'Desert Fury', description: 'Critical hits deal 2x damage instead of 1.5x', icon: '🔥' }},
+  { id: 'africa', name: 'Africa', color: 'bg-yellow-500', icon: '🦁', power: { name: 'Desert Fury', description: 'Critical hits deal 2x damage instead of 1.5x', icon: '🔥' }}
 ];
 
-const INITIAL_PLAYER_STATE = [
-  { name: "Player 1", faction: "House Saksa", avatar: "Black Fox", health: 100, energy: 50, stats: { attacksMade: 0, damageDealt: 0, criticalHits: 0 }},
-  { name: "Player 2", faction: "House Khilnuk", avatar: "Golden Vulture", health: 100, energy: 50, stats: { attacksMade: 0, damageDealt: 0, criticalHits: 0 }},
+const getInitialPlayerState = () => [
+  { 
+    name: "Player", 
+    faction: "House Saksa", 
+    avatar: "Black Fox", 
+    health: 100, 
+    energy: 50, 
+    stats: { attacksMade: 0, damageDealt: 0, criticalHits: 0 }
+  },
+  { 
+    name: "Computer", 
+    faction: "House Khilnuk", 
+    avatar: "Golden Vulture", 
+    health: 100, 
+    energy: 50, 
+    stats: { attacksMade: 0, damageDealt: 0, criticalHits: 0 }
+  }
 ];
 
-export default function App() {
+export default function BattleGame() {
   const [gameState, setGameState] = useState('worldSelection');
   const [selectedWorld, setSelectedWorld] = useState(null);
-  const [players, setPlayers] = useState([...INITIAL_PLAYER_STATE]);
+  const [players, setPlayers] = useState(getInitialPlayerState());
   const [currentTurn, setCurrentTurn] = useState(0);
   const [combatLog, setCombatLog] = useState([]);
   const [winner, setWinner] = useState(null);
@@ -24,11 +38,7 @@ export default function App() {
   const [powerActivations, setPowerActivations] = useState({ player1: 0, player2: 0 });
 
   const resetGame = () => {
-    const newPlayers = INITIAL_PLAYER_STATE.map(player => ({
-      ...player,
-      stats: { ...player.stats }
-    }));
-    setPlayers(newPlayers);
+    setPlayers(getInitialPlayerState());
     setCurrentTurn(0);
     setCombatLog([]);
     setWinner(null);
@@ -46,56 +56,6 @@ export default function App() {
     setGameState('worldSelection');
     setSelectedWorld(null);
     resetGame();
-  };
-
-  const applyWorldPower = (attacker, defender, damage, isCritical) => {
-    let finalDamage = damage;
-    const playerIndex = players.indexOf(attacker);
-
-    const updatePowerActivations = () => {
-      setPowerActivations(prev => ({
-        ...prev,
-        [`player${playerIndex + 1}`]: prev[`player${playerIndex + 1}`] + 1
-      }));
-    };
-
-    switch (selectedWorld?.id) {
-      case 'amazon':
-        if (attacker.health < 30) {
-          attacker.health = Math.min(100, attacker.health + 10);
-          updatePowerActivations();
-          setCombatLog(prev => [`💚 Nature's Blessing heals ${attacker.name}!`, ...prev]);
-        }
-        break;
-      case 'darkland':
-        if (Math.random() < 0.2) {
-          finalDamage *= 2;
-          updatePowerActivations();
-          setCombatLog(prev => [`🌒 Shadow Strike doubles damage!`, ...prev]);
-        }
-        break;
-      case 'alaska':
-        if (Math.random() < 0.25) {
-          finalDamage = Math.floor(finalDamage / 2);
-          updatePowerActivations();
-          setCombatLog(prev => [`🛡️ Frost Shield reduces damage!`, ...prev]);
-        }
-        break;
-      case 'europe':
-        attacker.energy = Math.min(50, attacker.energy + 5);
-        updatePowerActivations();
-        setCombatLog(prev => [`👑 Royal Might grants extra energy!`, ...prev]);
-        break;
-      case 'africa':
-        if (isCritical) {
-          finalDamage *= 2;
-          updatePowerActivations();
-          setCombatLog(prev => [`🔥 Desert Fury enhances critical hit!`, ...prev]);
-        }
-        break;
-    }
-
-    return finalDamage;
   };
 
   const attack = () => {
@@ -118,8 +78,6 @@ export default function App() {
     const isCritical = Math.random() < 0.2;
     let finalDamage = isCritical ? Math.floor(baseDamage * 1.5) : baseDamage;
 
-    finalDamage = applyWorldPower(attacker, defender, finalDamage, isCritical);
-
     // Update stats
     attacker.stats.attacksMade += 1;
     attacker.stats.damageDealt += finalDamage;
@@ -130,11 +88,10 @@ export default function App() {
     attacker.energy -= 10;
 
     setCombatLog(prev => [
-      `⚔️ ${attacker.name} deals ${finalDamage} damage to ${defender.name}${isCritical ? ' (CRITICAL!)' : ''}`,
+      `⚔️ ${attacker.name} deals ${finalDamage} damage${isCritical ? ' (CRITICAL!)' : ''}`,
       ...prev
     ]);
 
-    // Check victory condition
     if (defender.health <= 0) {
       setWinner(attacker);
       setGameState('victory');
@@ -145,6 +102,14 @@ export default function App() {
 
     setPlayers(newPlayers);
   };
+
+  // Computer's turn
+  useEffect(() => {
+    if (currentTurn === 1 && gameState === 'playing') {
+      const timer = setTimeout(attack, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentTurn, gameState]);
 
   if (gameState === 'worldSelection') {
     return (
@@ -184,16 +149,12 @@ export default function App() {
             <div className="text-sm space-y-1">
               <p>Damage Dealt: {winner.stats.damageDealt}</p>
               <p>Critical Hits: {winner.stats.criticalHits}</p>
-              <p>Power Activations: {powerActivations[`player${players.indexOf(winner) + 1}`]}</p>
               <p>Total Rounds: {battleRound}</p>
             </div>
           </div>
           <div className="space-y-3">
             <button
-              onClick={() => {
-                resetGame();
-                setGameState('playing');
-              }}
+              onClick={() => startNewGame(selectedWorld)}
               className="w-full bg-yellow-500 text-gray-900 py-2 rounded-lg font-bold hover:bg-yellow-400"
             >
               Rematch
@@ -229,21 +190,17 @@ export default function App() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative mb-6">
           {players.map((player, index) => (
             <div 
               key={index}
-              className={`p-4 rounded-lg ${
-                currentTurn === index 
-                  ? 'ring-2 ring-yellow-400 bg-gray-700' 
-                  : 'bg-gray-700'
-              }`}
+              className={`p-4 rounded-lg ${currentTurn === index ? 'ring-2 ring-yellow-400 bg-gray-700' : 'bg-gray-700'}`}
             >
               <div className="flex justify-between items-center mb-3">
-                <h2 className="font-bold text-lg">{player.name}</h2>
-                <div className="text-sm bg-gray-600 px-2 py-1 rounded">
-                  Power: {powerActivations[`player${index + 1}`]}
-                </div>
+                <h2 className="font-bold text-lg">
+                  {player.name}
+                  {index === currentTurn && <span className="ml-2 text-yellow-400">●</span>}
+                </h2>
               </div>
 
               <div className="space-y-3">
@@ -276,49 +233,32 @@ export default function App() {
                     />
                   </div>
                 </div>
-
-                <div className="grid grid-cols-3 gap-2 text-sm">
-                  <div>
-                    <div className="text-gray-400">Attacks</div>
-                    <div className="font-bold">{player.stats.attacksMade}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-400">Damage</div>
-                    <div className="font-bold">{player.stats.damageDealt}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-400">Crits</div>
-                    <div className="font-bold">{player.stats.criticalHits}</div>
-                  </div>
-                </div>
               </div>
             </div>
           ))}
+          
+          {/* Centered Attack Button */}
+          <button
+            onClick={attack}
+            disabled={currentTurn === 1}
+            className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10
+              w-16 h-16 rounded-full flex items-center justify-center
+              ${currentTurn === 0 
+                ? 'bg-yellow-500 hover:bg-yellow-400 hover:scale-110' 
+                : 'bg-gray-600 opacity-50 cursor-not-allowed'
+              } transition-all duration-200`}
+          >
+            <span className="text-2xl">⚔️</span>
+          </button>
         </div>
 
-        <div className="bg-gray-700 rounded-lg p-4 mb-6 h-40 overflow-y-auto">
+        <div className="bg-gray-700 rounded-lg p-4 h-32 overflow-y-auto">
           {combatLog.map((log, index) => (
-            <div 
-              key={index}
-              className={`text-sm ${
-                log.includes('💚') || log.includes('🌒') || log.includes('🛡️') || 
-                log.includes('👑') || log.includes('🔥') 
-                  ? 'text-yellow-400' 
-                  : 'text-gray-300'
-              } mb-1`}
-            >
+            <div key={index} className="text-sm text-gray-300 mb-1">
               {log}
             </div>
           ))}
         </div>
-
-        <button
-          onClick={attack}
-          className="w-full bg-yellow-500 text-gray-900 py-3 rounded-lg font-bold hover:bg-yellow-400 flex items-center justify-center gap-2"
-        >
-          <span className="text-xl">⚔️</span>
-          Attack
-        </button>
       </div>
     </div>
   );
