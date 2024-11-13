@@ -8,9 +8,9 @@ const WORLDS = [
   { id: 'africa', name: 'Africa', color: 'bg-yellow-500', icon: '🦁', power: { name: 'Desert Fury', description: 'Critical hits deal 2x damage instead of 1.5x', icon: '🔥' }}
 ];
 
-const getInitialPlayerState = () => [
+const getInitialPlayerState = (username = 'Player') => [
   { 
-    name: "Player", 
+    name: username, 
     faction: "House Saksa", 
     avatar: "Black Fox", 
     health: 100, 
@@ -27,10 +27,10 @@ const getInitialPlayerState = () => [
   }
 ];
 
-export default function BattleGame() {
+export default function BattleGame({ telegramUsername }) {
   const [gameState, setGameState] = useState('worldSelection');
   const [selectedWorld, setSelectedWorld] = useState(null);
-  const [players, setPlayers] = useState(getInitialPlayerState());
+  const [players, setPlayers] = useState(() => getInitialPlayerState(telegramUsername));
   const [currentTurn, setCurrentTurn] = useState(0);
   const [combatLog, setCombatLog] = useState([]);
   const [winner, setWinner] = useState(null);
@@ -38,7 +38,7 @@ export default function BattleGame() {
   const [powerActivations, setPowerActivations] = useState({ player1: 0, player2: 0 });
 
   const resetGame = () => {
-    setPlayers(getInitialPlayerState());
+    setPlayers(getInitialPlayerState(telegramUsername));
     setCurrentTurn(0);
     setCombatLog([]);
     setWinner(null);
@@ -198,8 +198,9 @@ export default function BattleGame() {
             >
               <div className="flex justify-between items-center mb-3">
                 <h2 className="font-bold text-lg">
-                  {player.name}
-                  {index === currentTurn && <span className="ml-2 text-yellow-400">●</span>}
+                {player.name}
+                {index === 0 && <span className="text-sm text-gray-400">(@{telegramUsername})</span>}
+                {index === currentTurn && <span className="text-yellow-400">●</span>}
                 </h2>
               </div>
 
