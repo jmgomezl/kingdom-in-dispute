@@ -113,17 +113,17 @@ export default function BattleGame({ telegramUsername }) {
 
   if (gameState === 'worldSelection') {
     return (
-      <div className="min-h-screen bg-gray-900 text-white p-4">
-        <h1 className="text-4xl font-bold text-center text-yellow-400 mb-8">Kingdom in Dispute</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+      <div className="min-h-[100dvh] bg-gray-900 text-white p-4 overflow-hidden">
+        <h1 className="text-3xl font-bold text-center text-yellow-400 mb-6">Kingdom in Dispute</h1>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
           {WORLDS.map(world => (
             <button 
               key={world.id} 
               onClick={() => startNewGame(world)} 
-              className={`${world.color} p-6 rounded-lg hover:opacity-90 transition-all`}
+              className={`${world.color} p-4 rounded-lg hover:opacity-90 transition-all`}
             >
-              <div className="text-4xl mb-2">{world.icon}</div>
-              <div className="text-xl font-bold mb-2">{world.name}</div>
+              <div className="text-3xl mb-2">{world.icon}</div>
+              <div className="text-lg font-bold mb-2">{world.name}</div>
               <div className="text-sm bg-black/20 rounded p-2">
                 <div className="flex items-center gap-2 justify-center mb-1">
                   <span>{world.power.icon}</span>
@@ -140,8 +140,8 @@ export default function BattleGame({ telegramUsername }) {
 
   if (gameState === 'victory') {
     return (
-      <div className="fixed inset-0 bg-black/90 flex items-center justify-center text-white">
-        <div className="bg-gray-800 rounded-xl p-8 max-w-md w-full text-center">
+        <div className="fixed inset-0 bg-gray-900 flex items-center justify-center text-white">
+        <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 text-center">
           <div className="text-6xl mb-4">🏆</div>
           <h2 className="text-4xl font-bold text-yellow-400 mb-4">{winner.name} Wins!</h2>
           <div className="bg-gray-700 rounded-lg p-4 mb-6">
@@ -172,45 +172,45 @@ export default function BattleGame({ telegramUsername }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-800 text-white p-4">
+    <div className="min-h-[100dvh] bg-gray-900 text-white p-4 overflow-hidden">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-4">
           <button
             onClick={returnToWorldSelection}
-            className="bg-gray-700 px-4 py-2 rounded-lg hover:bg-gray-600"
+            className="bg-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-600 text-sm"
           >
             🏠 Home
           </button>
-          <div className="flex items-center gap-4">
-            <span className="text-xl">Round {battleRound}</span>
-            <div className="flex items-center gap-2 bg-gray-700 px-3 py-1 rounded-lg">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">Round {battleRound}</span>
+            <div className="flex items-center gap-1 bg-gray-700 px-2 py-1 rounded-lg text-sm">
               <span>{selectedWorld.power.icon}</span>
               <span className="font-bold">{selectedWorld.power.name}</span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative mb-6">
+        <div className="grid grid-cols-1 gap-4 relative mb-4">
           {players.map((player, index) => (
             <div 
               key={index}
-              className={`p-4 rounded-lg ${currentTurn === index ? 'ring-2 ring-yellow-400 bg-gray-700' : 'bg-gray-700'}`}
+              className={`p-3 rounded-lg ${currentTurn === index ? 'ring-2 ring-yellow-400 bg-gray-800' : 'bg-gray-800'}`}
             >
-              <div className="flex justify-between items-center mb-3">
-                <h2 className="font-bold text-lg">
-                {player.name}
-                {index === 0 && <span className="text-sm text-gray-400">(@{telegramUsername})</span>}
-                {index === currentTurn && <span className="text-yellow-400">●</span>}
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="font-bold text-base flex items-center gap-1">
+                  {player.name}
+                  {index === 0 && <span className="text-xs text-gray-400">(@{telegramUsername})</span>}
+                  {index === currentTurn && <span className="text-yellow-400">●</span>}
                 </h2>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div>
-                  <div className="flex justify-between text-sm mb-1">
+                  <div className="flex justify-between text-xs mb-1">
                     <span>Health</span>
                     <span>{player.health}/100</span>
                   </div>
-                  <div className="h-2 bg-gray-600 rounded-full">
+                  <div className="h-2 bg-gray-700 rounded-full">
                     <div 
                       className={`h-full rounded-full transition-all ${
                         player.health > 60 ? 'bg-green-500' :
@@ -223,11 +223,11 @@ export default function BattleGame({ telegramUsername }) {
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-sm mb-1">
+                  <div className="flex justify-between text-xs mb-1">
                     <span>Energy</span>
                     <span>{player.energy}/50</span>
                   </div>
-                  <div className="h-2 bg-gray-600 rounded-full">
+                  <div className="h-2 bg-gray-700 rounded-full">
                     <div 
                       className="h-full bg-blue-500 rounded-full transition-all"
                       style={{ width: `${(player.energy / 50) * 100}%` }}
@@ -238,24 +238,23 @@ export default function BattleGame({ telegramUsername }) {
             </div>
           ))}
           
-          {/* Centered Attack Button */}
           <button
             onClick={attack}
             disabled={currentTurn === 1}
             className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10
-              w-16 h-16 rounded-full flex items-center justify-center
+              w-12 h-12 rounded-full flex items-center justify-center
               ${currentTurn === 0 
                 ? 'bg-yellow-500 hover:bg-yellow-400 hover:scale-110' 
                 : 'bg-gray-600 opacity-50 cursor-not-allowed'
               } transition-all duration-200`}
           >
-            <span className="text-2xl">⚔️</span>
+            <span className="text-xl">⚔️</span>
           </button>
         </div>
 
-        <div className="bg-gray-700 rounded-lg p-4 h-32 overflow-y-auto">
+        <div className="bg-gray-800 rounded-lg p-3 h-24 overflow-y-auto">
           {combatLog.map((log, index) => (
-            <div key={index} className="text-sm text-gray-300 mb-1">
+            <div key={index} className="text-xs text-gray-300 mb-1">
               {log}
             </div>
           ))}
