@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import RankingSystem from './RankingSystem';
 
 const WORLDS = [
   { id: 'amazon', name: 'Amazon', color: 'bg-green-700', icon: '🌳', power: { name: "Nature's Blessing", description: 'Heal 10 HP when below 30% health', icon: '💚' }},
@@ -36,6 +37,7 @@ export default function BattleGame({ telegramUsername }) {
     const [winner, setWinner] = useState(null);
     const [battleRound, setBattleRound] = useState(1);
     const [powerActivations, setPowerActivations] = useState({ player1: 0, player2: 0 });
+    const [isRankingOpen, setIsRankingOpen] = useState(false);
 
   const resetGame = () => {
     setPlayers(getInitialPlayerState(telegramUsername));
@@ -171,7 +173,8 @@ export default function BattleGame({ telegramUsername }) {
     );
   }
 
-  return (
+  // Main game screen return statement should be wrapped in a container
+return (
     <div className="fixed inset-0 bg-gray-900 text-white flex flex-col">
       {/* Header */}
       <div className="flex justify-between items-center p-3 bg-gray-800/50">
@@ -182,6 +185,12 @@ export default function BattleGame({ telegramUsername }) {
           🏠 Home
         </button>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsRankingOpen(true)}
+            className="bg-yellow-500/20 px-3 py-1.5 rounded-lg hover:bg-yellow-500/30 text-sm flex items-center gap-1"
+          >
+            🏆 Rankings
+          </button>
           <span className="text-sm">Round {battleRound}</span>
           <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded-lg text-sm">
             <span>{selectedWorld.power.icon}</span>
@@ -303,6 +312,13 @@ export default function BattleGame({ telegramUsername }) {
           ))}
         </div>
       </div>
+  
+      {/* Ranking Modal */}
+      <RankingSystem
+        currentUsername={telegramUsername}
+        isOpen={isRankingOpen}
+        onClose={() => setIsRankingOpen(false)}
+      />
     </div>
   );
 }
