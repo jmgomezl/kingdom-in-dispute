@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import RankingSystem from './RankingSystem';
+import PlayerDashboard from './PlayerDashboard';
 
 const WORLDS = [
   { id: 'amazon', name: 'Amazon', color: 'bg-green-700', icon: '🌳', power: { name: "Nature's Blessing", description: 'Heal 10 HP when below 30% health', icon: '💚' }},
@@ -29,15 +30,16 @@ const getInitialPlayerState = (username = 'Player') => [
 ];
 
 export default function BattleGame({ telegramUsername }) {
-    const [gameState, setGameState] = useState('worldSelection');
-    const [selectedWorld, setSelectedWorld] = useState(null);
-    const [players, setPlayers] = useState(() => getInitialPlayerState(telegramUsername));
-    const [currentTurn, setCurrentTurn] = useState(0);
-    const [combatLog, setCombatLog] = useState([]);
-    const [winner, setWinner] = useState(null);
-    const [battleRound, setBattleRound] = useState(1);
-    const [powerActivations, setPowerActivations] = useState({ player1: 0, player2: 0 });
-    const [isRankingOpen, setIsRankingOpen] = useState(false);
+  const [gameState, setGameState] = useState('worldSelection');
+  const [selectedWorld, setSelectedWorld] = useState(null);
+  const [players, setPlayers] = useState(() => getInitialPlayerState(telegramUsername));
+  const [currentTurn, setCurrentTurn] = useState(0);
+  const [combatLog, setCombatLog] = useState([]);
+  const [winner, setWinner] = useState(null);
+  const [battleRound, setBattleRound] = useState(1);
+  const [powerActivations, setPowerActivations] = useState({ player1: 0, player2: 0 });
+  const [isRankingOpen, setIsRankingOpen] = useState(false);
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
 
   const resetGame = () => {
     setPlayers(getInitialPlayerState(telegramUsername));
@@ -116,7 +118,15 @@ export default function BattleGame({ telegramUsername }) {
   if (gameState === 'worldSelection') {
     return (
       <div className="fixed inset-0 bg-gray-900 text-white p-4">
-        <h1 className="text-4xl font-bold text-center text-yellow-400 mb-8">Kingdom in Dispute</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold text-yellow-400">Kingdom in Dispute</h1>
+          <button
+            onClick={() => setIsDashboardOpen(true)}
+            className="bg-blue-500/20 px-3 py-1.5 rounded-lg hover:bg-blue-500/30 text-sm flex items-center gap-1"
+          >
+            📊 Stats
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {WORLDS.map(world => (
             <button 
@@ -136,6 +146,17 @@ export default function BattleGame({ telegramUsername }) {
             </button>
           ))}
         </div>
+
+        <PlayerDashboard
+          username={telegramUsername}
+          isOpen={isDashboardOpen}
+          onClose={() => setIsDashboardOpen(false)}
+        />
+        <RankingSystem
+          currentUsername={telegramUsername}
+          isOpen={isRankingOpen}
+          onClose={() => setIsRankingOpen(false)}
+        />
       </div>
     );
   }
@@ -169,27 +190,44 @@ export default function BattleGame({ telegramUsername }) {
             </button>
           </div>
         </div>
+        
+        <PlayerDashboard
+          username={telegramUsername}
+          isOpen={isDashboardOpen}
+          onClose={() => setIsDashboardOpen(false)}
+        />
+        <RankingSystem
+          currentUsername={telegramUsername}
+          isOpen={isRankingOpen}
+          onClose={() => setIsRankingOpen(false)}
+        />
       </div>
     );
   }
 
-  // Main game screen return statement should be wrapped in a container
+  // Main game screen return statement
 return (
     <div className="fixed inset-0 bg-gray-900 text-white flex flex-col">
       {/* Header */}
       <div className="flex justify-between items-center p-3 bg-gray-800/50">
         <button
           onClick={returnToWorldSelection}
-          className="bg-gray-700/50 px-3 py-1.5 rounded-lg hover:bg-gray-600 text-sm"
+          className="bg-gray-700/50 px-3 py-1.5 rounded-lg hover:bg-gray-600 text-sm flex items-center gap-1"
         >
-          🏠 Home
+          🏠 <span>Home</span>
         </button>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsDashboardOpen(true)}
+            className="bg-blue-500/20 px-3 py-1.5 rounded-lg hover:bg-blue-500/30 text-sm flex items-center gap-1"
+          >
+            📊 <span>Stats</span>
+          </button>
           <button
             onClick={() => setIsRankingOpen(true)}
             className="bg-yellow-500/20 px-3 py-1.5 rounded-lg hover:bg-yellow-500/30 text-sm flex items-center gap-1"
           >
-            🏆 Rankings
+            🏆 <span>Rankings</span>
           </button>
           <span className="text-sm">Round {battleRound}</span>
           <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded-lg text-sm">
@@ -204,13 +242,18 @@ return (
         {/* Players Container */}
         <div className="relative flex-1 flex flex-col justify-between py-3">
           {/* First Player */}
-          <div className={`bg-gray-800/50 rounded-lg p-4 border border-yellow-500/30`}>
+          <div className={`bg-gray-800/50 rounded-lg p-4 ${currentTurn === 0 ? 'border border-yellow-500/30' : ''}`}>
             <div className="flex items-center gap-2 mb-3">
-              <h2 className="font-bold text-base">
-                {players[0].name}
-              </h2>
-              <span className="text-xs text-gray-400">(@{telegramUsername})</span>
-              {currentTurn === 0 && <span className="text-yellow-400">●</span>}
+              <div className="flex-1 flex items-center gap-2">
+                <h2 className="font-bold text-base">
+                  {players[0].name}
+                </h2>
+                <span className="text-xs text-gray-400">(@{telegramUsername})</span>
+                {currentTurn === 0 && <span className="text-yellow-400">●</span>}
+              </div>
+              <span className={`text-sm ${players[0].health > 60 ? 'text-green-400' : players[0].health > 30 ? 'text-yellow-400' : 'text-red-400'}`}>
+                ♥️ {players[0].health}%
+              </span>
             </div>
   
             <div className="space-y-3">
@@ -261,12 +304,17 @@ return (
           </button>
   
           {/* Second Player */}
-          <div className={`bg-gray-800/50 rounded-lg p-4`}>
+          <div className={`bg-gray-800/50 rounded-lg p-4 ${currentTurn === 1 ? 'border border-yellow-500/30' : ''}`}>
             <div className="flex items-center gap-2 mb-3">
-              <h2 className="font-bold text-base">
-                {players[1].name}
-              </h2>
-              {currentTurn === 1 && <span className="text-yellow-400">●</span>}
+              <div className="flex-1 flex items-center gap-2">
+                <h2 className="font-bold text-base">
+                  {players[1].name}
+                </h2>
+                {currentTurn === 1 && <span className="text-yellow-400">●</span>}
+              </div>
+              <span className={`text-sm ${players[1].health > 60 ? 'text-green-400' : players[1].health > 30 ? 'text-yellow-400' : 'text-red-400'}`}>
+                ♥️ {players[1].health}%
+              </span>
             </div>
   
             <div className="space-y-3">
@@ -313,11 +361,16 @@ return (
         </div>
       </div>
   
-      {/* Ranking Modal */}
+      {/* Modals */}
       <RankingSystem
         currentUsername={telegramUsername}
         isOpen={isRankingOpen}
         onClose={() => setIsRankingOpen(false)}
+      />
+      <PlayerDashboard
+        username={telegramUsername}
+        isOpen={isDashboardOpen}
+        onClose={() => setIsDashboardOpen(false)}
       />
     </div>
   );
